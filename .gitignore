@@ -1,0 +1,9 @@
+.idea
+dist
+node_modules
+# Ignore all files and subdirectories inside the uploads folder
+/src/public/uploads/*
+# But, don't ignore the .gitkeep file inside it
+!/src/public/uploads/.gitkeep
+.env
+
