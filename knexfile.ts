@@ -1,4 +1,4 @@
-import { knex_config } from "./config/database";
+import { knex_config } from "./src/config/database";
 
 const knexConfig = {
   development: knex_config,
