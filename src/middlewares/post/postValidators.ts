@@ -2,7 +2,10 @@ import { NextFunction, Request, Response } from "express";
 import { check, validationResult } from "express-validator";
 import { unlink } from "fs";
 import path from "path";
-import { ALLOWED_POST_MEDIA_TYPES } from "../../config/constants";
+import {
+  ALLOWED_POST_MEDIA_TYPES,
+  VISIBILITY_TYPES,
+} from "../../config/constants";
 // Vallidate post data
 const postCreateValidators = [
   check("caption")
@@ -40,7 +43,18 @@ const postCreateValidators = [
 
     return true;
   }),
-  check("visibility").optional().isAlpha(),
+  check("visibility")
+    .isAlpha()
+    .custom((value, { req }) => {
+      if (!VISIBILITY_TYPES.includes(value)) {
+        throw new Error(
+          "Visibility type is invalid. Should be one of: " +
+            VISIBILITY_TYPES.join(",")
+        );
+      }
+
+      return true;
+    }),
 ];
 
 // Vallidate update data
@@ -80,7 +94,18 @@ const postUpdateValidators = [
 
       return true;
     }),
-  check("visibility").optional().isAlpha(),
+  check("visibility")
+    .isAlpha()
+    .custom((value, { req }) => {
+      if (!VISIBILITY_TYPES.includes(value)) {
+        throw new Error(
+          "Visibility type is invalid. Should be one of: " +
+            VISIBILITY_TYPES.join(",")
+        );
+      }
+
+      return true;
+    }),
 ];
 // Validator handler
 const postValidationHandler = function (

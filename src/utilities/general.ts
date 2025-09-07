@@ -45,10 +45,7 @@ export const prepareRouteParams = (params: any): Params => {
   };
 };
 
-export const deleteImage = (
-  filename: string,
-  subdirectory: string
-): Boolean => {
+export const deleteFile = (filename: string, subdirectory: string): Boolean => {
   if (!filename) {
     return false;
   }

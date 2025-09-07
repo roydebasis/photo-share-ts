@@ -6,6 +6,8 @@ export async function up(knex: Knex): Promise<void> {
     table.bigInteger("user_id").unsigned().notNullable();
     table.bigInteger("post_id").unsigned().notNullable();
     table.text("comment").notNullable();
+    table.bigInteger("likes_count").defaultTo(0);
+    table.bigInteger("replies_count").defaultTo(0);
     table.bigInteger("parent_id").unsigned().nullable();
     table.timestamps(true, true);
 

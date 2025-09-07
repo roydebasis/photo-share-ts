@@ -1,8 +1,10 @@
 import { dbInstance as db } from "../config/database";
 import { PaginationResult, Params } from "../interfaces/DBQuery.Interface";
+import { PostLikePayload } from "../interfaces/LikeInterface";
 import { Post } from "../interfaces/Post.Interface";
 
 const TABLE = "posts";
+const LIKE_TABLE = "likes";
 
 const PostModel = {
   async findAll(
@@ -64,6 +66,20 @@ const PostModel = {
 
   async delete(id: number): Promise<number> {
     return db<Post>(TABLE).where({ id }).del();
+  },
+
+  async like(data: PostLikePayload): Promise<number> {
+    const [id] = await db<Post>(LIKE_TABLE).insert(data);
+    return id;
+  },
+
+  async isLike(criteria: { [key: string]: any }): Promise<boolean> {
+    const row = await db(LIKE_TABLE).where(criteria).select(1).first();
+    return !!row;
+  },
+
+  async unLike(criteria: { [key: string]: any }): Promise<number> {
+    return db(LIKE_TABLE).where(criteria).del();
   },
 };
 

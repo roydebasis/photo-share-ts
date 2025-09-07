@@ -1,3 +1,4 @@
+//External Imports.
 import express from "express";
 
 //Internal Imports
@@ -6,8 +7,8 @@ import { verifyToken } from "../middlewares/common/verifyToken";
 import postUpload from "../middlewares/post/postUpload";
 import {
   postCreateValidators,
-  postValidationHandler,
   postUpdateValidators,
+  postValidationHandler,
 } from "../middlewares/post/postValidators";
 
 //Initiate Routes
@@ -30,5 +31,7 @@ router.put(
   PostController.update
 );
 router.delete("/:id", verifyToken, PostController.delete);
-
+router.post("/:id/like", verifyToken, PostController.like);
+router.delete("/:id/like", verifyToken, PostController.unlike);
+router.get("/:id/comments", verifyToken, PostController.comments);
 export default router;

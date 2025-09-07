@@ -12,10 +12,10 @@ import {
 } from "../controllers/userController";
 import avatarUploader from "../middlewares/auth/avatarUpload";
 import { verifyToken } from "../middlewares/common/verifyToken";
-const {
+import {
   createUpdateValidators,
   updateValidationHandler,
-} = require("../middlewares/user/userValidators");
+} from "../middlewares/user/userValidators";
 
 //Initiate Routes
 const router = express.Router();

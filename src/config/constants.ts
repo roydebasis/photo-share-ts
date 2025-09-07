@@ -96,21 +96,51 @@ export const HTTP_ERROR_MESSAGES = {
     statusCode: 401,
   },
 };
-
+export const APPLICATON_MESSAGES = {
+  CREATED: "Resource created successfully",
+  UPDATED: "Resource updated successfully",
+  DELETED: "Resource deleted successfully",
+  FETCHED: "Resource fetched successfully",
+  REGISTRATION_SUCCESS: "Sign-up successful.",
+  PASSWORD_RESET_SUCCESS: "Password reset successful",
+  LOGGED_IN: "Logged in successfully.",
+  LOGGED_OUT: "Logged out successfully",
+  ALLOWED_FILE_TYPES: "Allowed file types are: ",
+  INVALID_FILE_TYPE: "Invalid file type",
+  INVALID_FILE_SIZE: "Invalid file size",
+  UNAUTHORIZED: "Unauthorized to perform this action",
+  FORBIDDEN: "Access to this resource is forbidden",
+  NOT_FOUND: "Resource not found",
+  INTERNAL_ERROR: "Internal server error",
+  LOGIN_FAILED: "Login failed",
+  LOGOUT_FAILED: "Logout failed",
+  REFRESH_FAILED: "Refresh token failed",
+  VALIDATION_ERROR: "Validation error occurred",
+  VERIFICATION_FAILED: "Verification failed",
+  CREATE_FAILED: "Failed to create resource",
+  UPDATE_FAILED: "Failed to update resource",
+  DELETE_FAILED: "Failed to delete resource",
+  FETCH_FAILED: "Failed to fetch data",
+  ZOD_VALIDATION_ERROR: "Validation error occurred",
+  UNKNOWN_ERROR: "An unexpected error occurred",
+  INVALID_REQUEST: "Invalid request",
+  LIKE_SUCCESS: "Liked",
+  ALREADY_LIKED: "You have already liked this.",
+  UNLIKE_SUCCESS: "Unliked.",
+};
 export const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/jpg", "image/png"];
 export const AVATAR_MAX_IMAGE_SIZE = 1000000; // 1mb
 export const POST_MAX_IMAGE_SIZE = 10 * 1000000; //10MB
 export const ALLOWED_FILE_TYPES = ["application/pdf"];
-
-// Enhanced file types for posts (images, videos, gifs)
+export const VISIBILITY_TYPES = ["public", "private", "friends", "custom"];
 export const ALLOWED_POST_MEDIA_TYPES = [
-  "image/jpeg", 
-  "image/jpg", 
-  "image/png", 
-  "image/gif", 
+  "image/jpeg",
+  "image/jpg",
+  "image/png",
+  "image/gif",
   "image/webp",
   "video/mp4",
-  "video/avi", 
+  "video/avi",
   "video/mov",
-  "video/wmv"
+  "video/wmv",
 ];

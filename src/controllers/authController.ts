@@ -11,6 +11,7 @@ import { SafeUserProfile } from "../interfaces/User.Interface";
 import { createUser, findUser, updateUser } from "../services/userService";
 import { toSafeUserProfile } from "../transformers/userTransformer";
 import { avatarPath } from "../utilities/general";
+import { APPLICATON_MESSAGES } from "../config/constants";
 import {
   errorResponse,
   getErrorCode,
@@ -39,7 +40,11 @@ export const register = async (
     }
     const user = await createUser(data);
     const safeProfile: SafeUserProfile = toSafeUserProfile(user);
-    res.status(200).json(successResponse(safeProfile, "Sign-up successful."));
+    res
+      .status(200)
+      .json(
+        successResponse(safeProfile, APPLICATON_MESSAGES.REGISTRATION_SUCCESS)
+      );
   } catch (err) {
     res.status(getErrorCode(err)).json(errorResponse(err));
   }
@@ -81,7 +86,7 @@ export const login = async (
       avatar: avatarPath(user.avatar),
     };
 
-    res.status(200).json(successResponse(data, "Login successful."));
+    res.status(200).json(successResponse(data, APPLICATON_MESSAGES.LOGGED_IN));
   } catch (err) {
     res.status(getErrorCode(err)).json(errorResponse(err));
   }
@@ -121,7 +126,9 @@ export const resetPassword = async (
       APP_CONFIG.saltRounds
     );
     await updateUser({ id: req.params.id }, { password: hashedPassword });
-    res.status(200).json(successResponse(null, "Password reset successful."));
+    res
+      .status(200)
+      .json(successResponse(null, APPLICATON_MESSAGES.PASSWORD_RESET_SUCCESS));
   } catch (err) {
     res.status(getErrorCode(err)).json(errorResponse(err));
   }

@@ -1,10 +1,12 @@
 import { Request, Response } from "express";
 import { matchedData } from "express-validator";
+import { APPLICATON_MESSAGES } from "../config/constants";
 import { CustomAppRequest } from "../interfaces/Auth.Interface";
 import { Post } from "../interfaces/Post.Interface";
 import { FileUploadRequest } from "../interfaces/Upload.Interface";
+import { CommentService } from "../services/CommentService";
 import { PostService } from "../services/PostService";
-import { deleteImage, prepareRouteParams } from "../utilities/general";
+import { deleteFile, prepareRouteParams } from "../utilities/general";
 import {
   errorResponse,
   getErrorCode,
@@ -71,12 +73,15 @@ export class PostController {
       };
 
       const id = await PostService.create(data);
-      res.status(201).json(successResponse({ id: id }));
+      res
+        .status(201)
+        .json(successResponse({ id: id }, APPLICATON_MESSAGES.CREATED));
     } catch (err: any) {
       if (req.files && Array.isArray(req.files) && req.files.length > 0) {
         const { filename } = req.files[0];
-        deleteImage(filename, "posts");
+        deleteFile(filename, "posts");
       }
+      console.log(err);
       res.status(getErrorCode(err)).json(errorResponse(err));
     }
   }
@@ -89,7 +94,7 @@ export class PostController {
       const id = Number(req.params.id);
       const find = await PostService.getPostById(id);
       if (find.user_id !== req.loggedInUser?.id) {
-        throw new Error("You are not authorized to update this post.");
+        throw new Error(APPLICATON_MESSAGES.UNAUTHORIZED);
       }
       const validatedData = matchedData(req);
       const data: Partial<Post> = {};
@@ -117,14 +122,14 @@ export class PostController {
 
       //Remove current image
       if (find.filename && file) {
-        deleteImage(find.filename, "posts");
+        deleteFile(find.filename, "posts");
       }
       await PostService.update(id, data);
-      res.status(200).json(successResponse(null, "Updated successfully."));
+      res.status(200).json(successResponse(null, APPLICATON_MESSAGES.UPDATED));
     } catch (err: any) {
       if (req.files && Array.isArray(req.files) && req.files.length > 0) {
         const { filename } = req.files[0];
-        deleteImage(filename, "posts");
+        deleteFile(filename, "posts");
       }
       res.status(getErrorCode(err)).json(errorResponse(err));
     }
@@ -135,14 +140,71 @@ export class PostController {
       const id = Number(req.params.id);
       const find = await PostService.getPostById(id);
       if (find.user_id !== req.loggedInUser?.id) {
-        throw new Error("You are not authorized to delete this post.");
+        throw new Error(APPLICATON_MESSAGES.UNAUTHORIZED);
       }
-      deleteImage(find.filename, "posts");
+      deleteFile(find.filename, "posts");
       const deleted = await PostService.destory(id);
       res
         .status(200)
-        .json(successResponse({ id: deleted }, "Deleted successfully."));
+        .json(successResponse({ id: deleted }, APPLICATON_MESSAGES.DELETED));
     } catch (err: any) {
+      res.status(getErrorCode(err)).json(errorResponse(err));
+    }
+  }
+
+  static async like(req: CustomAppRequest, res: Response): Promise<void> {
+    try {
+      const pid = Number(req.params.id);
+      const user_id = req.loggedInUser?.id ? Number(req.loggedInUser.id) : 0;
+      if (await PostService.isPostLiked(user_id, pid)) {
+        throw new Error(APPLICATON_MESSAGES.ALREADY_LIKED);
+      }
+      const likeId = await PostService.likePost({
+        user_id: user_id,
+        post_id: pid,
+      });
+      res
+        .status(200)
+        .json(
+          successResponse({ id: likeId }, APPLICATON_MESSAGES.LIKE_SUCCESS)
+        );
+    } catch (err: any) {
+      if (err.code === "ER_DUP_ENTRY") {
+        res
+          .status(400)
+          .json(errorResponse(err, APPLICATON_MESSAGES.ALREADY_LIKED));
+      }
+      res.status(getErrorCode(err)).json(errorResponse(err));
+    }
+  }
+
+  static async unlike(req: CustomAppRequest, res: Response): Promise<void> {
+    try {
+      const id = Number(req.params.id);
+      const find = await PostService.unlikePost({
+        user_id: req.loggedInUser?.id,
+        post_id: id,
+      });
+      res
+        .status(200)
+        .json(successResponse({ id: id }, APPLICATON_MESSAGES.UNLIKE_SUCCESS));
+    } catch (err: any) {
+      res.status(getErrorCode(err)).json(errorResponse(err));
+    }
+  }
+
+  static async getLikes(req: Request, res: Response): Promise<void> {}
+
+  static async comments(req: Request, res: Response): Promise<void> {
+    try {
+      const id = Number(req.params.id);
+      const comments = await CommentService.getComments(
+        id,
+        prepareRouteParams(req.query)
+      );
+      res.status(200).json(successResponse(comments));
+    } catch (err: any) {
+      console.log(err);
       res.status(getErrorCode(err)).json(errorResponse(err));
     }
   }
