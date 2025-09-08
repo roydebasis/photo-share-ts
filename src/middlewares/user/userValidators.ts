@@ -1,13 +1,11 @@
 // external imports
+import { NextFunction, Request, Response } from "express";
 import { check, validationResult } from "express-validator";
 import createError from "http-errors";
-import path from "path";
-import { unlink } from "fs";
-import { Request, Response, NextFunction } from "express";
 import { deleteFile } from "../../utilities/general";
 
 // internal imports
-const { findUser } = require("../../services/userService");
+import { findUser } from "../../services/userService";
 
 // Vallidate user data
 const createUpdateValidators = [

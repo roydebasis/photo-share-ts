@@ -2,9 +2,6 @@
 import { NextFunction, Request, Response } from "express";
 import { check, validationResult } from "express-validator";
 
-// internal imports
-const { findUser } = require("../../services/userService");
-
 // Vallidate comment data
 const commentValidators = [
   check("post_id")

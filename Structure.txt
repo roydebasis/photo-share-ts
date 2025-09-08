@@ -1,0 +1,24 @@
+.
+├── src
+│   ├── config
+│   │   └── knex.ts
+│   ├── controllers
+│   │   └── user.controller.ts
+│   ├── interfaces
+│   │   └── user.interface.ts
+│   ├── middlewares
+│   │   └── validate.ts
+│   ├── models
+│   │   └── user.model.ts
+│   ├── routes
+│   │   └── user.route.ts
+│   ├── services
+│   │   └── user.service.ts
+│   ├── validations
+│   │   └── user.validation.ts
+│   ├── app.ts
+│   └── server.ts
+├── knexfile.ts
+├── package.json
+├── tsconfig.json
+└── .eslintrc.json

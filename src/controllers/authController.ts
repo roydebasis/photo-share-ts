@@ -3,6 +3,7 @@ import { NextFunction, Request, Response } from "express";
 import { matchedData } from "express-validator";
 import createError from "http-errors";
 import jwt, { SignOptions } from "jsonwebtoken";
+import regEvent from "../events/NewAccountEvent";
 
 //Internal imports
 import { APP_CONFIG } from "../config/appConfiguration";
@@ -40,6 +41,7 @@ export const register = async (
     }
     const user = await createUser(data);
     const safeProfile: SafeUserProfile = toSafeUserProfile(user);
+    regEvent.emit("accountOpened", safeProfile);
     res
       .status(200)
       .json(

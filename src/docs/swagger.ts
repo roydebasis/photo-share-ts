@@ -6,11 +6,11 @@ const options = {
   definition: {
     openapi: "3.0.0",
     info: {
-      title: "API Documentation",
+      title: "Photo Share API Documentation",
       version: "1.0.0",
-      description: "API documentation for the Backend API",
+      description: "Documentation for using photo share  APIs.",
       contact: {
-        name: "API Support",
+        name: "Support Team",
         email: "roy.debashish.sj@gmail.com",
       },
       "x-logo": {
@@ -32,7 +32,6 @@ const options = {
       schemas: {
         ...commonSchema,
       },
-
       securitySchemes: {
         bearerAuth: {
           type: "http",
@@ -56,7 +55,7 @@ const options = {
 
 export const swaggerUiOptions = {
   customSiteTitle: "API Documentation", // This updates the page title
-  customCss: ".swagger-ui .topbar { display: none }", // Additional custom CSS (optional)
+  //customCss: ".swagger-ui .topbar { display: none }", // Additional custom CSS (optional)
 };
 
 export const swaggerSpec = swaggerJsdoc(options);

@@ -17,7 +17,7 @@ const env = cleanEnv(process.env, {
   API_VERSION: str({ default: "v1" }),
   NODE_ENV: str({
     default: "development",
-    choices: ["development", "production", "staging"],
+    choices: ["development", "production", "staging", "test"],
   }),
   PORT: port({ default: 5000 }),
   JWT_SECRET: str({ default: "fallback-secret" }),
