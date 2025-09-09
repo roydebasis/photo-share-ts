@@ -6,8 +6,8 @@ export const apiPaths = {
   "/auth/register": {
     post: {
       tags: ["Authentication"],
-      summary: "User login",
-      description: "Login with email and password",
+      summary: "Registration",
+      description: "Create new account with email and password etc.",
       requestBody: {
         required: true,
         content: {
@@ -55,7 +55,7 @@ export const apiPaths = {
   "/auth/login": {
     post: {
       tags: ["Authentication"],
-      summary: "User login",
+      summary: "Login",
       description: "Login with email and password",
       requestBody: {
         required: true,
@@ -275,6 +275,48 @@ export const apiPaths = {
           content: {
             "application/json": {
               schema: commonSchema.Success,
+            },
+          },
+        },
+      },
+    },
+  },
+  ["/posts/{id}/comments"]: {
+    get: {
+      summary: "Get comments of a post",
+      description: "List comments of a post with paginated results.",
+      tags: ["Post"],
+      parameters: [commonParameters.rowIdInPath],
+      responses: {
+        "200": {
+          description: "Resource retrieved successfully",
+          content: {
+            "application/json": {
+              schema: commonSchema.Success,
+            },
+          },
+        },
+        "401": {
+          description: "Unauthorized",
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  errors: {
+                    properties: {
+                      common: {
+                        properties: {
+                          msg: {
+                            type: "string",
+                            example: "Authentication failed",
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
             },
           },
         },

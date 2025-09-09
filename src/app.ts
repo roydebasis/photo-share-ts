@@ -33,6 +33,12 @@ app.use(
   swaggerUI.serve,
   swaggerUI.setup(swaggerSpec, swaggerUiOptions)
 );
+//JSON FORMAT.
+app.use("/api-docs-json", (req, res, next) => {
+  res.setHeader("Content-Type", "application/json");
+  res.send(swaggerSpec);
+});
+
 /**
  * End API Routes
  * */
