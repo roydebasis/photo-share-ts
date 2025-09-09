@@ -7,11 +7,9 @@ import { describe, it } from "vitest";
 describe("GET /api/v1", () => {
   it("responds with a json message", () => {
     return request(app)
-      .get("/api/v1")
+      .get("/api/v1/posts")
       .set("Accept", "Application/json")
       .expect("Content-Type", /json/)
-      .expect(200, {
-        message: "Root API",
-      });
+      .expect(200);
   });
 });

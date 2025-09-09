@@ -1,13 +1,14 @@
 import swaggerJsdoc from "swagger-jsdoc";
-import { apiPaths } from "./paths/api.path";
-import { commonSchema } from "./schemas/common.schema";
+import { version } from "../../package.json";
+import { apiPaths } from "./paths/apiPath";
+import { commonSchema } from "./schemas/commonSchema";
 
 const options = {
   definition: {
     openapi: "3.0.0",
     info: {
       title: "Photo Share API Documentation",
-      version: "1.0.0",
+      version,
       description: "Documentation for using photo share  APIs.",
       contact: {
         name: "Support Team",
@@ -54,7 +55,7 @@ const options = {
 };
 
 export const swaggerUiOptions = {
-  customSiteTitle: "API Documentation", // This updates the page title
+  customSiteTitle: "Photo Share Docs", // This updates the page title
   //customCss: ".swagger-ui .topbar { display: none }", // Additional custom CSS (optional)
 };
 

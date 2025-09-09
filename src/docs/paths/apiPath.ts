@@ -1,5 +1,5 @@
-import { commonParameters } from "../parameters/common.parameters";
-import { commonSchema } from "../schemas/common.schema";
+import { commonParameters } from "../parameters/commonParameters";
+import { commonSchema } from "../schemas/commonSchema";
 
 // Manual API Paths
 export const apiPaths = {
@@ -8,9 +8,21 @@ export const apiPaths = {
       tags: ["Authentication"],
       summary: "User login",
       description: "Login with email and password",
-      // parameters: [commonParameters.clientType, commonParameters.clientVersion],
       requestBody: {
         required: true,
+        content: {
+          "application/json": {
+            schema: {
+              type: "object",
+              properties: {
+                name: { type: "string", example: "Debasis Roy" },
+                email: { type: "string", example: "ry.debasis@gmail.com" },
+                password: { type: "string", example: "Password123!" },
+                files: { type: "string", format: "binary" },
+              },
+            },
+          },
+        },
       },
       responses: {
         "200": {
@@ -45,9 +57,19 @@ export const apiPaths = {
       tags: ["Authentication"],
       summary: "User login",
       description: "Login with email and password",
-      // parameters: [commonParameters.clientType, commonParameters.clientVersion],
       requestBody: {
         required: true,
+        content: {
+          "application/json": {
+            schema: {
+              type: "object",
+              properties: {
+                username: { type: "string", example: "ry.debasis@gmail.com" },
+                password: { type: "string", example: "Password123!" },
+              },
+            },
+          },
+        },
       },
       responses: {
         "200": {
@@ -126,32 +148,21 @@ export const apiPaths = {
     post: {
       summary: "Create post",
       tags: ["Post"],
-      // parameters: [commonParameters.clientType, commonParameters.clientVersion],
-      parameters: [
-        {
-          name: "Token",
-          in: "header",
-          required: true,
-          description: "Put the token generated from login api",
-          schema: {
-            type: "string",
-            example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9",
-          },
-        },
-      ],
+      parameters: [commonParameters.token],
       requestBody: {
         required: true,
         content: {
-          "multipart/form-data": {
+          "application/json": {
             schema: {
               type: "object",
               properties: {
-                caption: { type: "string" },
+                caption: { type: "string", example: "Debasis Roy" },
                 visibility: {
                   type: "string",
                   enum: ["public", "private", "friends", "custom"],
+                  example: "public",
                 },
-                file: { type: "string", format: "binary" },
+                files: { type: "string", format: "binary" },
               },
             },
           },
@@ -255,54 +266,18 @@ export const apiPaths = {
         },
       },
     },
-  },
-  ["/posts/{id}"]: {
-    put: {
-      summary: "Update post",
+    get: {
+      summary: "Get post",
       tags: ["Post"],
-      parameters: [commonParameters.clientType, commonParameters.clientVersion],
-      requestBody: {
-        required: true,
-        content: {
-          "application/json": {
-            schema: {
-              type: "object",
-              properties: {
-                file_name: { type: "string" },
-              },
-            },
-          },
-        },
-      },
       responses: {
         "200": {
-          description: "File deleted successfully",
+          description: "Retrieved successfully",
           content: {
             "application/json": {
-              schema: {
-                type: "object",
-                properties: {
-                  status: { type: "boolean", example: true },
-                  message: {
-                    type: "string",
-                    example: "File deleted successfully",
-                  },
-                  result: {
-                    type: "object",
-                    properties: {
-                      id: { type: "number" },
-                      file_path: { type: "string" },
-                      file_name: { type: "string" },
-                      Posted_by: { type: "number" },
-                      provider: { type: "string" },
-                    },
-                  },
-                },
-              },
+              schema: commonSchema.Success,
             },
           },
         },
-        "500": { description: "Internal server error" },
       },
     },
   },

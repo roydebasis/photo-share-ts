@@ -2,7 +2,7 @@ import request from "supertest";
 
 import app from "../src/app";
 
-import { describe, it } from "vitest";
+import { describe, expect, it } from "vitest";
 
 describe("#app", () => {
   it("responds with a not found message", () => {

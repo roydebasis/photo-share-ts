@@ -13,7 +13,7 @@ import {
 
 //Initiate Routes
 const router = express.Router();
-router.get("/", verifyToken, PostController.getAll);
+router.get("/", PostController.getAll);
 router.post(
   "/",
   verifyToken,
