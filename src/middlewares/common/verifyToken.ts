@@ -1,44 +1,43 @@
-import { NextFunction, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
-import { APP_CONFIG } from "../../config/appConfiguration";
-import { CustomAppRequest, IJWTPayload } from "../../interfaces/Auth.Interface";
-import { errorResponse } from "../../utilities//responseHandlerHelper";
+import { APP_CONFIG } from "../../config/appConfig";
+import { APPLICATON_MESSAGES } from "../../config/constants";
+import { IJWTPayload } from "../../interfaces/AuthInterface";
+import { AppError } from "../../utilities/AppError";
+import { sendError } from "../../utilities/responseHelpers";
 
 export const verifyToken = (
-  req: CustomAppRequest,
+  req: Request,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    // token = cookies[process.env.COOKIE_NAME];
-    // const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    // req.user = decoded;
-    // next();
-
-    // Get the token from the request headers
-    // The format is typically "Bearer TOKEN"
+    /**
+     * Get the token from the request headers.The format is typically "Bearer TOKEN"
+     * */
     const authHeader = req.headers["authorization"];
     const token = authHeader && authHeader.split(" ")[1];
-
     if (token == null) {
-      return res
-        .status(401)
-        .json(errorResponse("", "Authentication failed. No token provided."));
+      return sendError(
+        res,
+        new AppError(APPLICATON_MESSAGES.INVALID_TOKEN, 403)
+      );
     }
 
     // Verify the token using the secret key
     jwt.verify(token, APP_CONFIG.jwt.secret, (err, decoded) => {
       if (err) {
         // If the token is invalid or expired, return 403 Forbidden
-        return res
-          .status(403)
-          .json(errorResponse("", "Invalid or expired token."));
+        return sendError(
+          res,
+          new AppError(APPLICATON_MESSAGES.INVALID_TOKEN, 403)
+        );
       }
       // The decoded payload contains the user's information
       req.loggedInUser = decoded as IJWTPayload;
       next(); // Proceed to the next middleware or route handler
     });
   } catch (err) {
-    res.status(500).json(errorResponse(err));
+    next(err);
   }
 };

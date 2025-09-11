@@ -1,11 +1,10 @@
 // external imports
 import { NextFunction, Request, Response } from "express";
 import { check, validationResult } from "express-validator";
-import createError from "http-errors";
 import { deleteFile } from "../../utilities/general";
 
 // internal imports
-import { findUser } from "../../services/userService";
+import { findUser } from "../../services/UserService";
 
 // Vallidate user data
 const createUpdateValidators = [
@@ -23,10 +22,10 @@ const createUpdateValidators = [
       try {
         const user = await findUser({ email: value }, req.params?.id);
         if (user) {
-          throw createError("Email already is use!");
+          throw new Error("Email already is use!");
         }
       } catch (err: any) {
-        throw createError(err.message);
+        throw new Error(err.message);
       }
     }),
   check("mobile")
@@ -38,10 +37,10 @@ const createUpdateValidators = [
       try {
         const user = await findUser({ mobile: value }, req.params?.id);
         if (user) {
-          throw createError("Mobile already is use!");
+          throw new Error("Mobile already is use!");
         }
       } catch (err: any) {
-        throw createError(err.message);
+        throw new Error(err.message);
       }
     }),
   check("gender")
@@ -67,7 +66,7 @@ const updateValidationHandler = function (
     deleteFile(filename, "avatars");
   }
 
-  res.status(400).json({
+  res.status(422).json({
     errors: mappedErrors,
   });
 };

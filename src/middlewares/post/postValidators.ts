@@ -4,8 +4,11 @@ import { unlink } from "fs";
 import path from "path";
 import {
   ALLOWED_POST_MEDIA_TYPES,
+  APPLICATON_MESSAGES,
   VISIBILITY_TYPES,
 } from "../../config/constants";
+import { ValidationError } from "../../utilities/ValidationError";
+import { validatorMappedErrors } from "../../utilities/general";
 // Vallidate post data
 const postCreateValidators = [
   check("caption")
@@ -131,9 +134,10 @@ const postValidationHandler = function (
     );
   }
 
-  res.status(400).json({
-    errors: mappedErrors,
-  });
+  throw new ValidationError(
+    APPLICATON_MESSAGES.VALIDATION_ERROR,
+    validatorMappedErrors(mappedErrors)
+  );
 };
 
 export { postCreateValidators, postUpdateValidators, postValidationHandler };

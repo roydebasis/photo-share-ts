@@ -1,8 +1,7 @@
 // external imports
-import createError from "http-errors";
 import multer from "multer";
 import path from "path";
-import { MulterFile } from "../interfaces/Upload.Interface";
+import { MulterFile } from "../interfaces/UploadInterface";
 import { createDirectory } from "../utilities/general";
 
 // Enhanced file type detection
@@ -121,7 +120,7 @@ export default function uploader(
         cb(null, true);
       } else {
         cb(
-          createError(
+          new Error(
             `${error_msg} Detected: ${fileInfo.mimeType} (${fileInfo.mediaType})`
           )
         );

@@ -1,6 +1,6 @@
 import nodemailer from "nodemailer";
 import { Readable } from "stream";
-import { APP_CONFIG } from "../config/appConfiguration";
+import { APP_CONFIG } from "../config/appConfig";
 
 export interface Attachment {
   filename?: string;

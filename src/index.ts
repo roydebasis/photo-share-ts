@@ -1,5 +1,5 @@
 import app from "./app";
-import { APP_CONFIG } from "./config/appConfiguration";
+import { APP_CONFIG } from "./config/appConfig";
 const port = APP_CONFIG.port;
 app.listen(port, () => {
   console.log(`🚀 Server is running on port ${port}`);

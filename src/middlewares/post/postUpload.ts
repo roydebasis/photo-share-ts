@@ -4,6 +4,7 @@ import {
   POST_MAX_IMAGE_SIZE,
 } from "../../config/constants";
 import uploader from "../../utilities/singleUploader";
+import { AppError } from "../../utilities/AppError";
 
 export default function postUpload(
   req: Request,
@@ -20,13 +21,14 @@ export default function postUpload(
   // call the middleware function
   upload.any()(req, res, (err: any) => {
     if (err) {
-      res.status(500).json({
-        errors: {
-          files: {
-            msg: err.message,
-          },
-        },
-      });
+      // res.status(500).json({
+      //   errors: {
+      //     files: {
+      //       msg: err.message,
+      //     },
+      //   },
+      // });
+      throw new AppError(err.message, 500);
     } else {
       next();
     }

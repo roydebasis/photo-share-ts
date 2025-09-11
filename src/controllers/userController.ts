@@ -1,15 +1,14 @@
 import { NextFunction, Request, Response } from "express";
-import fs from "fs";
-import createError from "http-errors";
 import path from "path";
 
 //Internal imports
-import { APP_CONFIG } from "../config/appConfiguration";
-import { CustomAppRequest } from "../interfaces/Auth.Interface";
-import { SafeUserProfile } from "../interfaces/User.Interface";
+import { APP_CONFIG } from "../config/appConfig";
+import { APPLICATON_MESSAGES } from "../config/constants";
+import { PaginationResult } from "../interfaces/DBQueryInterface";
+import { SafeUserProfile } from "../interfaces/UserInterface";
 import { addEmailJob } from "../queues/emailQueue";
 import { reportQueue } from "../queues/reportQueue";
-import { MailOptions } from "../services/mailerService";
+import { MailOptions } from "../services/MailerService";
 import {
   findUser,
   getFollowers as followersByUser,
@@ -19,14 +18,15 @@ import {
   isFollowing,
   unFollowUser,
   updateUser,
-} from "../services/userService";
+} from "../services/UserService";
 import { toSafeUserProfile } from "../transformers/userTransformer";
-import { prepareRouteParams, sanitizeUpdate } from "../utilities/general";
+import { AppError } from "../utilities/AppError";
 import {
-  errorResponse,
-  getErrorCode,
-  successResponse,
-} from "../utilities/responseHandlerHelper";
+  deleteFile,
+  prepareRouteParams,
+  sanitizeUpdate,
+} from "../utilities/general";
+import { sendError, sendSuccess } from "../utilities/responseHelpers";
 
 async function getUsers(req: Request, res: Response, next: NextFunction) {
   try {
@@ -45,9 +45,9 @@ async function getUsers(req: Request, res: Response, next: NextFunction) {
       sort,
       order
     );
-    res.status(200).json(successResponse(result));
+    sendSuccess<PaginationResult<SafeUserProfile>>(res, result);
   } catch (err) {
-    res.status(getErrorCode(err)).json(errorResponse(err));
+    next(err);
   }
 }
 
@@ -59,9 +59,9 @@ async function getProfile(
   try {
     const result = await findUser({ id: req.params.id });
     const safeProfile: SafeUserProfile = toSafeUserProfile(result);
-    res.status(200).json(successResponse(safeProfile));
+    sendSuccess<SafeUserProfile>(res, safeProfile);
   } catch (err) {
-    res.status(getErrorCode(err)).json(errorResponse(err));
+    next(err);
   }
 }
 
@@ -73,7 +73,8 @@ async function update(
   try {
     const user = await findUser({ id: req.params.id });
     if (!user) {
-      throw createError("User not found.");
+      sendError(res, new AppError(APPLICATON_MESSAGES.NOT_FOUND, 404));
+      return;
     }
     const data = req.body;
     if (
@@ -87,78 +88,60 @@ async function update(
         __dirname,
         `../public/uploads/avatars/${user.avatar}`
       );
-      if (fs.existsSync(oldAvatar)) {
-        fs.unlinkSync(oldAvatar);
-      }
+      deleteFile(oldAvatar, "avatars");
       data.avatar = req.files[0].filename;
     }
     const sanitizedData = sanitizeUpdate(data, ["password", "role"]);
     const result = await updateUser({ id: req.params.id }, sanitizedData);
-    res
-      .status(200)
-      .json(successResponse(result, "Resource updated successfully."));
+    sendSuccess<SafeUserProfile>(res, result);
   } catch (err) {
     if (req.files && Array.isArray(req.files) && req.files.length > 0) {
       const { filename } = req.files[0];
-      const uploadedAvatar = path.join(
-        __dirname,
-        `../public/uploads/avatars/${filename}`
-      );
-      if (fs.existsSync(uploadedAvatar)) {
-        fs.unlinkSync(uploadedAvatar);
-      }
+      deleteFile(filename, "avatars");
     }
-    res.status(getErrorCode(err)).json(errorResponse(err));
+    next(err);
   }
 }
 
 async function deleteUser(req: Request, res: Response, next: NextFunction) {
   try {
-    res.status(200).json(successResponse(null, "Deleted successfully."));
+    sendSuccess<number>(res, 1);
   } catch (err) {
-    res.status(getErrorCode(err)).json(errorResponse(err));
+    next(err);
   }
 }
 
-async function follow(
-  req: CustomAppRequest,
-  res: Response,
-  next: NextFunction
-) {
+async function follow(req: Request, res: Response, next: NextFunction) {
   try {
     const followerId = Number(req.loggedInUser?.id ?? 0);
     const followeeId = Number(req.params.id ?? 0);
     if (followerId === followeeId) {
-      throw createError("You cannot follow yourself.");
+      return sendError(res, new AppError("You cannot follow yourself.", 422));
     }
     const isExists = await isFollowing(followerId, followeeId);
     if (isExists) {
-      throw createError("Already following this user.");
+      return sendError(res, new AppError("Already following this user.", 422));
     }
     await followUser(followerId, followeeId);
-    res.status(200).json(successResponse(null, "Followed successfully."));
+    sendSuccess<null>(res, null);
   } catch (err) {
-    res.status(getErrorCode(err)).json(errorResponse(err));
+    next(err);
   }
 }
 
-async function unfollow(
-  req: CustomAppRequest,
-  res: Response,
-  next: NextFunction
-) {
+async function unfollow(req: Request, res: Response, next: NextFunction) {
   try {
     const result = await unFollowUser(
       Number(req.loggedInUser?.id),
       Number(req.params.id)
     );
-
     if (!result) {
-      throw createError("Not following this user.");
+      throw new AppError("You are not following this user.", 422);
+      return;
     }
-    res.status(200).json(successResponse(null, "Unfollowed successfully."));
+    sendSuccess<null>(res, null);
   } catch (err) {
-    res.status(getErrorCode(err)).json(errorResponse(err));
+    next(err);
   }
 }
 /**
@@ -167,24 +150,18 @@ async function unfollow(
  * @param {*} res
  * @param {*} next
  */
-async function getFollowers(
-  req: CustomAppRequest,
-  res: Response,
-  next: NextFunction
-) {
+async function getFollowers(req: Request, res: Response, next: NextFunction) {
   try {
     const followerId = Number(req.loggedInUser?.id ?? 0);
     const followeeId = Number(req.params.id ?? 0);
     if (followerId !== followeeId) {
-      throw createError("You canno see other users followers.");
+      return sendError(res, new AppError(APPLICATON_MESSAGES.FORBIDDEN, 403));
     }
     const queryParams = prepareRouteParams(req.query);
     const result = await followersByUser(req.params.id, queryParams);
-    res
-      .status(200)
-      .json(successResponse(result, "Resource retrieved successfully."));
+    sendSuccess(res, result);
   } catch (err) {
-    res.status(getErrorCode(err)).json(errorResponse(err));
+    next(err);
   }
 }
 /**
@@ -193,24 +170,20 @@ async function getFollowers(
  * @param {*} res
  * @param {*} next
  */
-async function getFollowing(
-  req: CustomAppRequest,
-  res: Response,
-  next: NextFunction
-) {
+async function getFollowing(req: Request, res: Response, next: NextFunction) {
   try {
     const followerId = Number(req.loggedInUser?.id ?? 0);
     const followeeId = Number(req.params.id ?? 0);
     if (followerId !== followeeId) {
-      throw createError("You cannot see who other users following.");
+      if (followerId !== followeeId) {
+        return sendError(res, new AppError(APPLICATON_MESSAGES.FORBIDDEN, 403));
+      }
     }
     const queryParams = prepareRouteParams(req.query);
     const result = await followingByUser(req.params.id, queryParams);
-    res
-      .status(200)
-      .json(successResponse(result, "Resource retrieved successfully."));
+    sendSuccess(res, result);
   } catch (err) {
-    res.status(getErrorCode(err)).json(errorResponse(err));
+    next();
   }
 }
 /**

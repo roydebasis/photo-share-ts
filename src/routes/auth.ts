@@ -2,7 +2,7 @@
 import express from "express";
 
 //Internal Imports
-import { login, register, resetPassword } from "../controllers/authController";
+import { login, register, resetPassword } from "../controllers/AuthController";
 import {
   createUserValidationHandler,
   createUserValidators,

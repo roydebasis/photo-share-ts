@@ -1,6 +1,9 @@
 // external imports
 import { NextFunction, Request, Response } from "express";
 import { check, validationResult } from "express-validator";
+import { APPLICATON_MESSAGES } from "../../config/constants";
+import { ValidationError } from "../../utilities/ValidationError";
+import { validatorMappedErrors } from "../../utilities/general";
 
 // Vallidate comment data
 const commentValidators = [
@@ -32,9 +35,10 @@ const commentValidationHandler = function (
     next();
     return;
   }
-  res.status(400).json({
-    errors: mappedErrors,
-  });
+  throw new ValidationError(
+    APPLICATON_MESSAGES.VALIDATION_ERROR,
+    validatorMappedErrors(mappedErrors)
+  );
 };
 
 const commentUpdateValidators = [
@@ -55,9 +59,10 @@ const commentUpdateValidationHandler = function (
     next();
     return;
   }
-  res.status(400).json({
-    errors: mappedErrors,
-  });
+  throw new ValidationError(
+    APPLICATON_MESSAGES.VALIDATION_ERROR,
+    validatorMappedErrors(mappedErrors)
+  );
 };
 
 export {
