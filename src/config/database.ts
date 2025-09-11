@@ -1,5 +1,5 @@
 import { knex, Knex } from "knex";
-import { APP_CONFIG } from "./appConfiguration";
+import { APP_CONFIG } from "./appConfig";
 
 const configurations = {
   mysql: {

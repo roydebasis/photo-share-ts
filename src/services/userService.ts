@@ -1,8 +1,9 @@
 import bcrypt from "bcrypt";
 import { dbInstance as db } from "../config/database";
-import { IUserRow } from "../interfaces/Auth.Interface";
-import { Params } from "../interfaces/DBQuery.Interface";
-import { User } from "../interfaces/User.Interface";
+import { IUserRow } from "../interfaces/AuthInterface";
+import { PaginationResult, Params } from "../interfaces/DBQueryInterface";
+import { SafeUserProfile, User } from "../interfaces/UserInterface";
+import { AppError } from "../utilities/AppError";
 
 export const createUser = async (userRow: IUserRow): Promise<User> => {
   const saltRounds = parseInt(process.env.SALT_ROUNDS || "10", 10);
@@ -24,7 +25,7 @@ export const getAllUsers = async (
   search: string = "",
   sort: string = "id",
   order: string = "asc"
-) => {
+): Promise<PaginationResult<SafeUserProfile>> => {
   try {
     const users = await db("users")
       .select(
@@ -50,7 +51,7 @@ export const getAllUsers = async (
     const total_pages = Math.ceil(total / limit);
 
     return {
-      data: users,
+      items: users,
       pagination: {
         total,
         page: page,
@@ -59,11 +60,12 @@ export const getAllUsers = async (
         has_more: page < total_pages,
       },
     };
-  } catch (err) {
-    throw new Error(
+  } catch (err: any) {
+    throw new AppError(
       `Error fetching user: ${
         err instanceof Error ? err.message : "Unknown error"
-      }`
+      }`,
+      err.code || 500
     );
   }
 };
@@ -200,7 +202,7 @@ export const getFollowers = async (userId: string, params: Params) => {
     const total_pages = Math.ceil(total / limit);
 
     return {
-      data: followers,
+      item: followers,
       pagination: {
         total: total,
         page: page,

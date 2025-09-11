@@ -18,6 +18,7 @@ export interface IJWTPayload {
   role: string;
 }
 
+//TODO:: this is no longer needed. Use Request from express.
 export interface CustomAppRequest extends Request {
-  loggedInUser?: IJWTPayload | undefined;
+  loggedInUser?: IJWTPayload;
 }

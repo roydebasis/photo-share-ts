@@ -4,9 +4,9 @@ import { ExpressAdapter } from "@bull-board/express";
 import express from "express";
 import path from "path";
 import swaggerUI from "swagger-ui-express";
-import { testWorkers } from "./controllers/userController";
+import { testWorkers } from "./controllers/UserController";
 import { swaggerSpec, swaggerUiOptions } from "./docs/swagger";
-import * as errorHandlers from "./middlewares/errorHandlers";
+import { errorHandler, notFound } from "./middlewares/common/handleErrors";
 import { emailQueue } from "./queues/emailQueue";
 import { reportQueue } from "./queues/reportQueue";
 import routes from "./routes";
@@ -73,7 +73,7 @@ app.use("/admin/queues", serverAdapter.getRouter());
 /** --- End BullMQ Dashboard Setup --- */
 
 //Error Handlers
-app.use(errorHandlers.notFound);
-app.use(errorHandlers.errorHandler);
+app.use(notFound);
+app.use(errorHandler);
 
 export default app;

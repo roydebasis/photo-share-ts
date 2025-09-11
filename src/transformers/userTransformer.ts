@@ -1,4 +1,4 @@
-import { SafeUserProfile, User } from "../interfaces/User.Interface";
+import { SafeUserProfile, User } from "../interfaces/UserInterface";
 import { avatarPath } from "../utilities/general";
 
 export const toSafeUserProfile = (user: User): SafeUserProfile => {

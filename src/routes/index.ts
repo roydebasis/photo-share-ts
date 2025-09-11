@@ -1,11 +1,11 @@
 import express from "express";
 
 //Internal Imports
-import { APP_CONFIG } from "../config/appConfiguration";
+import { APP_CONFIG } from "../config/appConfig";
 import authRoutes from "./auth";
+import commentRoutes from "./comment";
 import postRoutes from "./post";
 import userRoutes from "./user";
-import commentRoutes from "./comment";
 
 //Initiate Routes
 const router = express.Router();

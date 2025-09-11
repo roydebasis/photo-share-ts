@@ -1,6 +1,6 @@
 import { Worker } from "bullmq";
 import { connection } from "../config/redisConnection";
-import { MailOptions, transporter } from "../services/mailerService";
+import { MailOptions, transporter } from "../services/MailerService";
 
 // Create a worker to process email jobs
 const emailWorker = new Worker<MailOptions>(

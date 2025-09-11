@@ -9,7 +9,7 @@ import {
   getUsers,
   unfollow,
   update,
-} from "../controllers/userController";
+} from "../controllers/UserController";
 import avatarUploader from "../middlewares/auth/avatarUpload";
 import { verifyToken } from "../middlewares/common/verifyToken";
 import {

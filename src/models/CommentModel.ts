@@ -1,6 +1,10 @@
 import { dbInstance as db } from "../config/database";
 import { Comment, CommentPayload } from "../interfaces/CommentInterface";
-import { PaginationResult, Params } from "../interfaces/DBQuery.Interface";
+import {
+  PaginationResult,
+  Params,
+  RawQueryResult,
+} from "../interfaces/DBQueryInterface";
 
 const TABLE = "comments";
 
@@ -62,7 +66,42 @@ const CommentModel = {
   },
 
   async delete(id: number): Promise<number> {
-    return db(TABLE).where({ id }).del();
+    // return db(TABLE).where({ id }).orWhere("parent_id", id).del();
+
+    return db.transaction<number>(async (trx) => {
+      // 1. Use a raw query with a recursive CTE to find all descendant IDs
+      const descendantIdsResult = await trx.raw<[RawQueryResult[], unknown[]]>(
+        `
+      WITH RECURSIVE CommentHierarchy AS (
+        SELECT id FROM comments WHERE id = ?
+        UNION ALL
+        SELECT c.id FROM comments c
+        JOIN CommentHierarchy ch ON c.parent_id = ch.id
+      )
+      SELECT id FROM CommentHierarchy;
+    `,
+        [id]
+      );
+
+      // MySQL returns `[rows, fields]` so we access the first element
+      // We use a type assertion to tell TypeScript the shape of the data
+      const idsToDelete = (descendantIdsResult[0] as RawQueryResult[]).map(
+        (row) => row.id
+      );
+      console.log("idsToDelete: ", idsToDelete);
+
+      // 2. Perform a single delete operation on all the found IDs
+      if (idsToDelete.length > 0) {
+        await trx("comments").whereIn("id", idsToDelete).del();
+
+        // For MySQL, `del()` returns a number of affected rows
+        // We return the number directly.
+        return idsToDelete.length;
+      }
+
+      // Return 0 if the initial comment was not found
+      return 0;
+    });
   },
 };
 

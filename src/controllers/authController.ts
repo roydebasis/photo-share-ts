@@ -1,23 +1,19 @@
 import bcrypt from "bcrypt";
 import { NextFunction, Request, Response } from "express";
 import { matchedData } from "express-validator";
-import createError from "http-errors";
 import jwt, { SignOptions } from "jsonwebtoken";
 import regEvent from "../events/NewAccountEvent";
 
 //Internal imports
-import { APP_CONFIG } from "../config/appConfiguration";
-import { IJWTPayload, IUserRow } from "../interfaces/Auth.Interface";
-import { SafeUserProfile } from "../interfaces/User.Interface";
-import { createUser, findUser, updateUser } from "../services/userService";
-import { toSafeUserProfile } from "../transformers/userTransformer";
-import { avatarPath } from "../utilities/general";
+import { APP_CONFIG } from "../config/appConfig";
 import { APPLICATON_MESSAGES } from "../config/constants";
-import {
-  errorResponse,
-  getErrorCode,
-  successResponse,
-} from "../utilities/responseHandlerHelper";
+import { IJWTPayload, IUserRow } from "../interfaces/AuthInterface";
+import { SafeUserProfile } from "../interfaces/UserInterface";
+import { createUser, findUser, updateUser } from "../services/UserService";
+import { toSafeUserProfile } from "../transformers/userTransformer";
+import { AppError } from "../utilities/AppError";
+import { avatarPath } from "../utilities/general";
+import { sendError, sendSuccess } from "../utilities/responseHelpers";
 
 export const register = async (
   req: Request,
@@ -42,13 +38,9 @@ export const register = async (
     const user = await createUser(data);
     const safeProfile: SafeUserProfile = toSafeUserProfile(user);
     regEvent.emit("accountOpened", safeProfile);
-    res
-      .status(200)
-      .json(
-        successResponse(safeProfile, APPLICATON_MESSAGES.REGISTRATION_SUCCESS)
-      );
+    sendSuccess<SafeUserProfile>(res, safeProfile);
   } catch (err) {
-    res.status(getErrorCode(err)).json(errorResponse(err));
+    next(err);
   }
 };
 
@@ -60,16 +52,21 @@ export const login = async (
   try {
     const user = await findUser({ email: req.body.username });
     if (!user) {
-      throw createError("Unknown user.");
+      // throw new AppError(APPLICATON_MESSAGES.NOT_FOUND, 404);
+      return sendError(res, new AppError(APPLICATON_MESSAGES.NOT_FOUND, 404));
     }
-
     const isValidPassword = await bcrypt.compare(
       req.body.password,
       user.password
     );
     if (!isValidPassword) {
-      throw createError("Invalid credentials.");
+      // throw new AppError(APPLICATON_MESSAGES.INVALID_REQUEST, 401);
+      return sendError(
+        res,
+        new AppError(APPLICATON_MESSAGES.INVALID_REQUEST, 401)
+      );
     }
+
     //TODO:: move jwt token generation to a separate function
     const payload: IJWTPayload = {
       id: user.id,
@@ -79,7 +76,6 @@ export const login = async (
     const secret = APP_CONFIG.jwt.secret;
     const options = { expiresIn: APP_CONFIG.jwt.expiry } as SignOptions;
     const token = jwt.sign(payload, secret, options);
-
     const data = {
       token,
       ...payload,
@@ -88,9 +84,9 @@ export const login = async (
       avatar: avatarPath(user.avatar),
     };
 
-    res.status(200).json(successResponse(data, APPLICATON_MESSAGES.LOGGED_IN));
+    sendSuccess<object>(res, data);
   } catch (err) {
-    res.status(getErrorCode(err)).json(errorResponse(err));
+    next(err);
   }
 };
 
@@ -102,7 +98,7 @@ export const resetPassword = async (
   try {
     const user = await findUser({ id: req.params.id });
     if (!user) {
-      throw createError("Unknown user.");
+      return sendError(res, new AppError(APPLICATON_MESSAGES.NOT_FOUND, 401));
     }
 
     const isValidPassword = await bcrypt.compare(
@@ -110,7 +106,10 @@ export const resetPassword = async (
       user.password
     );
     if (!isValidPassword) {
-      throw createError("Password does not match.");
+      return sendError(
+        res,
+        new AppError(APPLICATON_MESSAGES.INVALID_REQUEST, 422)
+      );
     }
 
     const isSameAsOld = await bcrypt.compare(
@@ -118,8 +117,9 @@ export const resetPassword = async (
       user.password
     );
     if (isSameAsOld) {
-      throw createError(
-        "You have entered the same password as the old password."
+      return sendError(
+        res,
+        new AppError(APPLICATON_MESSAGES.SAME_PASSWORD, 422)
       );
     }
 
@@ -128,10 +128,8 @@ export const resetPassword = async (
       APP_CONFIG.saltRounds
     );
     await updateUser({ id: req.params.id }, { password: hashedPassword });
-    res
-      .status(200)
-      .json(successResponse(null, APPLICATON_MESSAGES.PASSWORD_RESET_SUCCESS));
+    sendSuccess(res, null);
   } catch (err) {
-    res.status(getErrorCode(err)).json(errorResponse(err));
+    next(err);
   }
 };

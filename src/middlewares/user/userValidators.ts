@@ -5,7 +5,7 @@ import createError from "http-errors";
 import { deleteFile } from "../../utilities/general";
 
 // internal imports
-import { findUser } from "../../services/userService";
+import { findUser } from "../../services/UserService";
 
 // Vallidate user data
 const createUpdateValidators = [
@@ -67,7 +67,7 @@ const updateValidationHandler = function (
     deleteFile(filename, "avatars");
   }
 
-  res.status(400).json({
+  res.status(422).json({
     errors: mappedErrors,
   });
 };

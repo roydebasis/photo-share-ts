@@ -1,7 +1,7 @@
 import fs, { promises } from "fs";
 import path from "path";
-import { APP_CONFIG } from "../config/appConfiguration";
-import { Params } from "../interfaces/DBQuery.Interface";
+import { APP_CONFIG } from "../config/appConfig";
+import { Params } from "../interfaces/DBQueryInterface";
 
 export const sanitizeUpdate = (
   data: any,
@@ -57,4 +57,17 @@ export const deleteFile = (filename: string, subdirectory: string): Boolean => {
     fs.unlinkSync(postImage);
   }
   return true;
+};
+
+export const validatorMappedErrors = (errors: { [key: string]: any }) => {
+  const errorsArray = [];
+  for (const key in errors) {
+    if (errors.hasOwnProperty(key)) {
+      errorsArray.push({
+        field: key,
+        message: errors[key].msg,
+      });
+    }
+  }
+  return errorsArray;
 };

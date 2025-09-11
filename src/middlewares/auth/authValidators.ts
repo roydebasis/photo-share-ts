@@ -2,9 +2,11 @@
 import { NextFunction, Request, Response } from "express";
 import { check, validationResult } from "express-validator";
 import { unlink } from "fs";
-import createError from "http-errors";
 import path from "path";
-import { findUser } from "../../services/userService";
+import { APPLICATON_MESSAGES } from "../../config/constants";
+import { findUser } from "../../services/UserService";
+import { validatorMappedErrors } from "../../utilities/general";
+import { ValidationError } from "../../utilities/ValidationError";
 
 // Vallidate user data
 const createUserValidators = [
@@ -28,10 +30,10 @@ const createUserValidators = [
       try {
         const user = await findUser({ username: value });
         if (user) {
-          throw createError("Username already in use!");
+          throw new Error("Username already in use!");
         }
       } catch (err: any) {
-        throw createError(err.message);
+        throw Error(err.message);
       }
     }),
   check("email")
@@ -42,10 +44,10 @@ const createUserValidators = [
       try {
         const user = await findUser({ email: value });
         if (user) {
-          throw createError("Email already in use!");
+          throw Error("Email already in use!");
         }
       } catch (err: any) {
-        throw createError(err.message);
+        throw Error(err.message);
       }
     }),
   check("mobile")
@@ -57,10 +59,10 @@ const createUserValidators = [
       try {
         const user = await findUser({ mobile: value });
         if (user) {
-          throw createError("Mobile already in use!");
+          throw Error("Mobile already in use!");
         }
       } catch (err: any) {
-        throw createError(err.message);
+        throw Error(err.message);
       }
     }),
   check("gender").optional().isAlpha(),
@@ -82,7 +84,6 @@ const createUserValidationHandler = function (
     next();
     return;
   }
-
   // remove uploaded files
   if (req.files && Array.isArray(req.files) && req.files.length > 0) {
     const { filename } = req.files[0];
@@ -94,11 +95,11 @@ const createUserValidationHandler = function (
     );
   }
 
-  res.status(400).json({
-    errors: mappedErrors,
-  });
+  throw new ValidationError(
+    APPLICATON_MESSAGES.VALIDATION_ERROR,
+    validatorMappedErrors(mappedErrors)
+  );
 };
-
 // Vallidate user data
 const resetPasswordValidators = [
   check("current_password")
@@ -124,9 +125,10 @@ const resetPasswordValidatorHandler = function (
     next();
     return;
   }
-  res.status(400).json({
-    errors: mappedErrors,
-  });
+  throw new ValidationError(
+    APPLICATON_MESSAGES.VALIDATION_ERROR,
+    validatorMappedErrors(mappedErrors)
+  );
 };
 
 export {

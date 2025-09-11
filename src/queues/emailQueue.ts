@@ -1,6 +1,6 @@
 import { Queue } from "bullmq";
 import { connection } from "../config/redisConnection";
-import { MailOptions } from "../services/mailerService";
+import { MailOptions } from "../services/MailerService";
 
 export const emailQueue = new Queue<MailOptions>("emailQueue", { connection });
 

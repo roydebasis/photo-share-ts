@@ -1,7 +1,7 @@
 import bcrypt from "bcrypt";
 import dotenv from "dotenv";
 import { Knex } from "knex";
-import { APP_CONFIG } from "../../config/appConfiguration";
+import { APP_CONFIG } from "../../config/appConfig";
 dotenv.config();
 
 /**

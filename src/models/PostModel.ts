@@ -1,7 +1,7 @@
 import { dbInstance as db } from "../config/database";
-import { PaginationResult, Params } from "../interfaces/DBQuery.Interface";
+import { PaginationResult, Params } from "../interfaces/DBQueryInterface";
 import { PostLikePayload } from "../interfaces/LikeInterface";
-import { Post } from "../interfaces/Post.Interface";
+import { Post } from "../interfaces/PostInterface";
 
 const TABLE = "posts";
 const LIKE_TABLE = "likes";
@@ -80,6 +80,28 @@ const PostModel = {
 
   async unLike(criteria: { [key: string]: any }): Promise<number> {
     return db(LIKE_TABLE).where(criteria).del();
+  },
+
+  async increaseLikeCount(postId: number, count: number = 1): Promise<number> {
+    return db(TABLE).where("id", postId).increment("likes_count", count);
+  },
+
+  async decreaseLikeCount(postId: number, count: number = 1): Promise<number> {
+    return db(TABLE).where("id", postId).decrement("likes_count", count);
+  },
+
+  async increaseCommentCount(
+    postId: number,
+    count: number = 1
+  ): Promise<number> {
+    return db(TABLE).where("id", postId).increment("comments_count", count);
+  },
+
+  async decreaseCommentCount(
+    postId: number,
+    count: number = 1
+  ): Promise<number> {
+    return db(TABLE).where("id", postId).decrement("comments_count", count);
   },
 };
 

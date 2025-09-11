@@ -6,6 +6,13 @@ export interface Params {
   search?: string;
 }
 
+/*
+ * Interface for the result of the raw query, which returns a flat list of IDs.
+ */
+export interface RawQueryResult {
+  id: number;
+}
+
 export interface PaginationResult<T> {
   items: T[];
   pagination: {
