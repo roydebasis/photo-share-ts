@@ -1,6 +1,5 @@
 // external imports
 import { Request } from "express";
-import createError from "http-errors";
 import multer from "multer";
 import path from "path";
 import { MulterFile } from "../interfaces/UploadInterface";
@@ -48,7 +47,7 @@ function uploader(
         req.files.length > max_number_of_files
       ) {
         cb(
-          createError(
+          new Error(
             `Maximum ${max_number_of_files} files are allowed to upload!`
           )
         );
@@ -56,7 +55,7 @@ function uploader(
         if (allowed_file_types.includes(file.mimetype)) {
           cb(null, true);
         } else {
-          cb(createError(error_msg));
+          cb(new Error(error_msg));
         }
       }
     },
