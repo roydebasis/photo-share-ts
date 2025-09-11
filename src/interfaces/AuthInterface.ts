@@ -1,5 +1,3 @@
-import { Request } from "express";
-
 export interface IUserRow {
   name: string;
   username: string;
@@ -16,9 +14,4 @@ export interface IJWTPayload {
   id: number;
   email: string;
   role: string;
-}
-
-//TODO:: this is no longer needed. Use Request from express.
-export interface CustomAppRequest extends Request {
-  loggedInUser?: IJWTPayload;
 }

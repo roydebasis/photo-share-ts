@@ -28,5 +28,7 @@ router.put(
   CommentController.update
 );
 router.delete("/:id", verifyToken, CommentController.delete);
+router.post("/:id/like", verifyToken, CommentController.like);
+router.delete("/:id/like", verifyToken, CommentController.unlike);
 
 export default router;

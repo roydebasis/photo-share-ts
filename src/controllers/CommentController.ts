@@ -70,4 +70,26 @@ export class CommentController {
       next(err);
     }
   }
+
+  static async like(req: Request, res: Response, next: NextFunction) {
+    try {
+    } catch (err: any) {
+      next(err);
+    }
+  }
+
+  static async unlike(req: Request, res: Response, next: NextFunction) {
+    try {
+      // const id = Number(req.params.id);
+      // await CommentService.getById(id); // check if exists
+      // const deleted = await CommentService.unlikeComment({
+      //   user_id: req.loggedInUser?.id,
+      //   comment_id: id,
+      // });
+      // await CommentService.decreaseLikeCount(id);
+      // sendSuccess(res, { affected_rows: deleted });
+    } catch (err: any) {
+      next(err);
+    }
+  }
 }
